@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英検２級 単語フラッシュカード</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-back {
+            background: #f8f9fa;
+            transform: rotateY(180deg);
+        }
+
+        .word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .word-type {
+            font-size: 1rem;
+            color: #667eea;
+            background: #e3e8ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .meaning {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .example {
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .example-ja {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .knowledge-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+            .word {
+                font-size: 2rem;
+            }
+            
+            .meaning {
+                font-size: 1.2rem;
+            }
+            
+            .card {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 英検２級 単語帳</h1>
+        </div>
+
+        <div class="progress">
+            <div id="progressText">カード 1 / 50</div>
+        </div>
+
+        <div class="card-container">
+            <div class="card" id="flashcard" onclick="flipCard()">
+                <div class="card-face card-front">
+                    <div class="word" id="frontWord">クリックしてスタート</div>
+                    <div class="hint">カードをクリックして裏返す</div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="word-type" id="wordType">動詞</div>
+                    <div class="meaning" id="meaning">意味</div>
+                    <div class="example" id="example">例文</div>
+                    <div class="example-ja" id="exampleJa">例文の日本語訳</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-secondary" onclick="previousCard()">← 前へ</button>
+            <button class="btn-primary" onclick="shuffleCards()">🔀 シャッフル</button>
+            <button class="btn-secondary" onclick="nextCard()">次へ →</button>
+        </div>
+
+        <div class="knowledge-buttons">
+            <button class="btn-danger" onclick="markCard('unknown')">❌ 覚えてない</button>
+            <button class="btn-success" onclick="markCard('known')">✓ 覚えた</button>
+        </div>
+
+        <div class="stats">
+            <h3>学習進捗</h3>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number" id="knownCount">0</div>
+                    <div class="stat-label">覚えた</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="unknownCount">0</div>
+                    <div class="stat-label">要復習</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">50</div>
+                    <div class="stat-label">総単語数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 英検２級頻出単語データ
+        const vocabularyData = [
+            { word: "achieve", type: "動詞", meaning: "達成する、成し遂げる", example: "She worked hard to achieve her goals.", exampleJa: "彼女は目標を達成するために一生懸命働いた。" },
+            { word: "advantage", type: "名詞", meaning: "利点、有利", example: "Having a car gives you a big advantage.", exampleJa: "車を持っていることは大きな利点だ。" },
+            { word: "afford", type: "動詞", meaning: "〜する余裕がある", example: "I can't afford to buy a new phone.", exampleJa: "新しい電話を買う余裕がない。" },
+            { word: "appropriate", type: "形容詞", meaning: "適切な", example: "Please wear appropriate clothing for the interview.", exampleJa: "面接には適切な服装で来てください。" },
+            { word: "atmosphere", type: "名詞", meaning: "雰囲気、大気", example: "The restaurant has a pleasant atmosphere.", exampleJa: "そのレストランは心地よい雰囲気だ。" },
+            { word: "attitude", type: "名詞", meaning: "態度、姿勢", example: "She has a positive attitude toward life.", exampleJa: "彼女は人生に対して前向きな態度を持っている。" },
+            { word: "beneficial", type: "形容詞", meaning: "有益な", example: "Exercise is beneficial to your health.", exampleJa: "運動は健康に有益だ。" },
+            { word: "capable", type: "形容詞", meaning: "能力がある", example: "He is capable of solving difficult problems.", exampleJa: "彼は難しい問題を解決する能力がある。" },
+            { word: "circumstance", type: "名詞", meaning: "状況、事情", example: "Under the circumstances, we had no choice.", exampleJa: "その状況では選択肢がなかった。" },
+            { word: "community", type: "名詞", meaning: "地域社会、共同体", example: "Our community organized a festival.", exampleJa: "私たちの地域社会は祭りを企画した。" },
+            { word: "concentrate", type: "動詞", meaning: "集中する", example: "I need to concentrate on my studies.", exampleJa: "勉強に集中する必要がある。" },
+            { word: "concern", type: "名詞・動詞", meaning: "関心、心配、〜に関係する", example: "Environmental issues are a major concern.", exampleJa: "環境問題は主要な関心事だ。" },
+            { word: "consequence", type: "名詞", meaning: "結果、影響", example: "Every action has consequences.", exampleJa: "すべての行動には結果がある。" },
+            { word: "contemporary", type: "形容詞", meaning: "現代の、同時代の", example: "This museum features contemporary art.", exampleJa: "この美術館は現代美術を特集している。" },
+            { word: "contribute", type: "動詞", meaning: "貢献する、寄付する", example: "Everyone can contribute to society.", exampleJa: "誰もが社会に貢献できる。" },
+            { word: "convince", type: "動詞", meaning: "納得させる、説得する", example: "I tried to convince him to join us.", exampleJa: "彼に参加するよう説得しようとした。" },
+            { word: "decline", type: "動詞・名詞", meaning: "断る、減少する", example: "Sales have declined this year.", exampleJa: "今年売上が減少した。" },
+            { word: "demonstrate", type: "動詞", meaning: "実証する、示す", example: "The experiment demonstrates the theory.", exampleJa: "その実験は理論を実証している。" },
+            { word: "distinguish", type: "動詞", meaning: "区別する", example: "Can you distinguish between the two?", exampleJa: "その二つを区別できますか？" },
+            { word: "diverse", type: "形容詞", meaning: "多様な", example: "Tokyo has a diverse population.", exampleJa: "東京は多様な人口を持っている。" },
+            { word: "domestic", type: "形容詞", meaning: "国内の、家庭の", example: "Domestic flights are cheaper than international ones.", exampleJa: "国内線は国際線より安い。" },
+            { word: "efficiency", type: "名詞", meaning: "効率", example: "We need to improve our efficiency.", exampleJa: "私たちは効率を改善する必要がある。" },
+            { word: "eliminate", type: "動詞", meaning: "取り除く、排除する", example: "We must eliminate waste.", exampleJa: "無駄を排除しなければならない。" },
+            { word: "emphasize", type: "動詞", meaning: "強調する", example: "The teacher emphasized the importance of practice.", exampleJa: "先生は練習の重要性を強調した。" },
+            { word: "encounter", type: "動詞・名詞", meaning: "遭遇する、出会う", example: "We encountered several problems.", exampleJa: "私たちはいくつかの問題に遭遇した。" },
+            { word: "essential", type: "形容詞", meaning: "不可欠な、必須の", example: "Water is essential for life.", exampleJa: "水は生命に不可欠だ。" },
+            { word: "establish", type: "動詞", meaning: "設立する、確立する", example: "The company was established in 1990.", exampleJa: "その会社は1990年に設立された。" },
+            { word: "estimate", type: "動詞・名詞", meaning: "見積もる、推定する", example: "I estimate it will take two hours.", exampleJa: "2時間かかると見積もっている。" },
+            { word: "evaluate", type: "動詞", meaning: "評価する", example: "Teachers evaluate students' performance.", exampleJa: "教師は生徒の成績を評価する。" },
+            { word: "evidence", type: "名詞", meaning: "証拠", example: "There is no evidence to support this claim.", exampleJa: "この主張を裏付ける証拠はない。" },
+            { word: "Furthermore", type: "副詞", meaning: "さらに、その上", example: "Furthermore, we need more time.", exampleJa: "さらに、もっと時間が必要だ。" },
+            { word: "generate", type: "動詞", meaning: "生み出す、発生させる", example: "Solar panels generate electricity.", exampleJa: "ソーラーパネルは電気を生み出す。" },
+            { word: "indeed", type: "副詞", meaning: "実際に、本当に", example: "It was indeed a difficult task.", exampleJa: "それは実際に難しい仕事だった。" },
+            { word: "inevitable", type: "形容詞", meaning: "避けられない", example: "Change is inevitable.", exampleJa: "変化は避けられない。" },
+            { word: "influence", type: "名詞・動詞", meaning: "影響、影響を与える", example: "Parents influence their children's behavior.", exampleJa: "親は子供の行動に影響を与える。" },
+            { word: "maintain", type: "動詞", meaning: "維持する、保つ", example: "It's important to maintain good health.", exampleJa: "健康を維持することは重要だ。" },
+            { word: "moreover", type: "副詞", meaning: "その上、さらに", example: "Moreover, the price is reasonable.", exampleJa: "その上、価格も妥当だ。" },
+            { word: "nevertheless", type: "副詞", meaning: "それにもかかわらず", example: "It was raining; nevertheless, we went out.", exampleJa: "雨が降っていた。それにもかかわらず、私たちは外出した。" },
+            { word: "obtain", type: "動詞", meaning: "得る、入手する", example: "You need to obtain permission first.", exampleJa: "まず許可を得る必要がある。" },
+            { word: "obvious", type: "形容詞", meaning: "明らかな", example: "The answer is obvious.", exampleJa: "答えは明らかだ。" },
+            { word: "occur", type: "動詞", meaning: "起こる、発生する", example: "The accident occurred yesterday.", exampleJa: "その事故は昨日起こった。" },
+            { word: "overcome", type: "動詞", meaning: "克服する", example: "She overcame many difficulties.", exampleJa: "彼女は多くの困難を克服した。" },
+            { word: "participate", type: "動詞", meaning: "参加する", example: "Everyone can participate in the event.", exampleJa: "誰でもそのイベントに参加できる。" },
+            { word: "perspective", type: "名詞", meaning: "見方、視点", example: "Try to see it from my perspective.", exampleJa: "私の視点から見てみてください。" },
+            { word: "practical", type: "形容詞", meaning: "実用的な、実際的な", example: "We need a practical solution.", exampleJa: "実用的な解決策が必要だ。" },
+            { word: "preserve", type: "動詞", meaning: "保存する、守る", example: "We must preserve our natural resources.", exampleJa: "私たちは自然資源を守らなければならない。" },
+            { word: "regional", type: "形容詞", meaning: "地域の", example: "Regional differences are significant.", exampleJa: "地域差は大きい。" },
+            { word: "relevant", type: "形容詞", meaning: "関連のある", example: "Please provide relevant information.", exampleJa: "関連する情報を提供してください。" },
+            { word: "sufficient", type: "形容詞", meaning: "十分な", example: "Do we have sufficient time?", exampleJa: "十分な時間がありますか？" },
+            { word: "Therefore", type: "副詞", meaning: "したがって", example: "Therefore, we must act quickly.", exampleJa: "したがって、私たちは迅速に行動しなければならない。" }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+        let knownWords = new Set();
+        let unknownWords = new Set();
+
+        function displayCard(index) {
+            const card = vocabularyData[index];
+            document.getElementById('frontWord').textContent = card.word;
+            document.getElementById('wordType').textContent = card.type;
+            document.getElementById('meaning').textContent = card.meaning;
+            document.getElementById('example').textContent = card.example;
+            document.getElementById('exampleJa').textContent = card.exampleJa;
+            document.getElementById('progressText').textContent = `カード ${index + 1} / ${vocabularyData.length}`;
+            
+            // カードが裏返っていたら表に戻す
+            if (isFlipped) {
+                flipCard();
+            }
+        }
+
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % vocabularyData.length;
+            displayCard(currentIndex);
+        }
+
+        function previousCard() {
+            currentIndex = (currentIndex - 1 + vocabularyData.length) % vocabularyData.length;
+            displayCard(currentIndex);
+        }
+
+        function shuffleCards() {
+            for (let i = vocabularyData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [vocabularyData[i], vocabularyData[j]] = [vocabularyData[j], vocabularyData[i]];
+            }
+            currentIndex = 0;
+            displayCard(currentIndex);
+        }
+
+        function markCard(status) {
+            const currentWord = vocabularyData[currentIndex].word;
+            
+            if (status === 'known') {
+                knownWords.add(currentWord);
+                unknownWords.delete(currentWord);
+            } else {
+                unknownWords.add(currentWord);
+                knownWords.delete(currentWord);
+            }
+            
+            updateStats();
+            nextCard();
+        }
+
+        function updateStats() {
+            document.getElementById('knownCount').textContent = knownWords.size;
+            document.getElementById('unknownCount').textContent = unknownWords.size;
+        }
+
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === ' ') {
+                e.preventDefault();
+                flipCard();
+            }
+            if (e.key === '1') markCard('unknown');
+            if (e.key === '2') markCard('known');
+        });
+
+        // 初期表示
+        displayCard(currentIndex);
+    </script>
+</body>
+</html>
